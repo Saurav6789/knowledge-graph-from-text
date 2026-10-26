@@ -103,8 +103,9 @@ project/
 │   └── utils.py              # config loading, logging, path helpers
 │
 ├── main.py                   # CLI orchestrator - runs all 6 stages end to end
-├── config.yaml                # every tunable parameter lives here
-├── requirements.txt
+├── config.yaml               # every tunable parameter lives here
+├── pyproject.toml / uv.lock  # uv project definition + locked dependencies
+├── requirements.txt          # pip alternative
 │
 ├── notebooks/
 │   └── knowledge_graph_walkthrough.ipynb   # stage-by-stage interactive walkthrough
@@ -133,7 +134,10 @@ the tutorial before showing `main.py` tie everything together.
 
 ## Pre-conditions
 
-- **Python 3.10, 3.11, or 3.12** (developed & tested on 3.12).
+- **Python 3.11 or 3.12** (developed & tested on 3.12; pinned in
+  `.python-version`). Python 3.13+ is not supported by the pinned
+  spaCy 3.7 release.
+- **[uv](https://docs.astral.sh/uv/)** (recommended) or plain `pip`.
 - **~500 MB free disk space** (spaCy model + dataset + graph exports).
 - **Internet access** on first run, to download:
   - the BBC News dataset (~5 MB, from GitHub), and
@@ -150,13 +154,29 @@ the tutorial before showing `main.py` tie everything together.
 
 ## Setup
 
-### 1. Clone / unzip the repository
+### 1. Clone the repository
 
 ```bash
-cd knowledge-graph-nlp
+git clone https://github.com/Saurav6789/knowledge-graph-from-text.git
+cd knowledge-graph-from-text
 ```
 
-### 2. Create a virtual environment (strongly recommended)
+### Option A — uv (recommended)
+
+The project ships a `pyproject.toml` and `uv.lock`, so a single command
+creates the virtual environment, installs every pinned dependency
+(including the `en_core_web_sm` spaCy model and `pytest`):
+
+```bash
+uv sync
+```
+
+Then prefix commands with `uv run`, e.g. `uv run python main.py` or
+`uv run pytest`. Skip ahead to [step 5](#5-verify-the-install).
+
+### Option B — pip
+
+#### 2. Create a virtual environment (strongly recommended)
 
 ```bash
 python3 -m venv venv
@@ -168,13 +188,13 @@ source venv/bin/activate
 venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+#### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Download the spaCy English model
+#### 4. Download the spaCy English model
 
 ```bash
 python -m spacy download en_core_web_sm
@@ -357,8 +377,10 @@ This also works well with:
 ## Running tests
 
 ```bash
-pip install pytest   # already in requirements.txt
+pip install pytest   # pip users; uv sync installs it automatically
 pytest tests/ -v
+# or, with uv:
+uv run pytest -v
 ```
 
 The suite covers: config loading, text cleaning, sentence segmentation,
@@ -371,9 +393,12 @@ handling.
 ## Project structure
 
 ```
-knowledge-graph-nlp/
+knowledge-graph-from-text/
 ├── README.md
 ├── LICENSE
+├── pyproject.toml
+├── uv.lock
+├── .python-version
 ├── requirements.txt
 ├── config.yaml
 ├── main.py
