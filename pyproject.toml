@@ -1,0 +1,32 @@
+[project]
+name = "knowledge-graph-from-text"
+version = "0.1.0"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "spacy==3.7.5",
+    "en-core-web-sm",
+    "networkx==3.3",
+    "pyvis==0.3.2",
+    "pandas==2.2.2",
+    "pyarrow==17.0.0",
+    "tqdm==4.66.4",
+    "PyYAML==6.0.1",
+    "python-slugify==8.0.4",
+    "requests==2.32.3",
+    "neo4j==5.23.1",
+    "matplotlib==3.9.2",
+    "numpy<2",
+    "click>=8.5.0",
+]
+
+[tool.uv.sources]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

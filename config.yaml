@@ -1,0 +1,81 @@
+# =========================================================
+# Knowledge Graph from Unstructured Text - Configuration
+# =========================================================
+# Every tunable knob for the pipeline lives here so the code
+# itself never needs to be touched for a normal run.
+
+data:
+  # Primary source: raw GitHub mirror of the BBC News Full Text
+  # dataset (Greene & Cunningham, 2006) - 2,225 real news articles
+  # across 5 categories. This is a widely used, industry-standard
+  # benchmark corpus for NLP (topic modelling / text classification
+  # papers routinely use it), so it is a realistic stand-in for
+  # "real" unstructured business documents.
+  source_url: "https://raw.githubusercontent.com/suraj-deshmukh/BBC-Dataset-News-Classification/master/dataset/dataset.csv"
+  # Fallback mirror (same corpus, pre-lowercased - still fine for
+  # topic/relation mining, slightly weaker for NER capitalization cues)
+  fallback_url: "https://raw.githubusercontent.com/mdsohaib/BBC-News-Classification/master/bbc-text.csv"
+  raw_path: "data/raw/bbc-text.csv"
+  processed_path: "data/processed/articles_clean.parquet"
+  # Set to null to process the full corpus (2,225 docs, ~10-20 min on CPU).
+  # Set to an int (e.g. 150) for a fast tutorial-friendly demo run.
+  sample_size: 150
+  # Restrict to specific categories, or leave empty for all
+  # (business, entertainment, politics, sport, tech)
+  categories: ["business", "tech"]
+  random_seed: 42
+
+preprocessing:
+  min_sentence_length: 4       # tokens
+  max_doc_chars: 20000
+  lowercase_entities: false
+
+nlp:
+  spacy_model: "en_core_web_sm"
+  # Entity types kept as knowledge-graph nodes
+  keep_entity_labels:
+    - PERSON
+    - ORG
+    - GPE
+    - LOC
+    - PRODUCT
+    - EVENT
+    - NORP
+    - FAC
+    - MONEY
+    - DATE
+  # Merge multi-token noun chunks/entities into single graph nodes
+  merge_noun_chunks: true
+  coreference:
+    enabled: true
+    # Simple heuristic pronoun resolution window (sentences look-back)
+    lookback_sentences: 3
+
+relation_extraction:
+  method: "dependency"   # "dependency" (spaCy SVO parsing) or "openie_lite"
+  min_confidence: 0.0
+  drop_stopword_only_relations: true
+  max_relation_tokens: 6
+
+graph:
+  backend: "networkx"     # "networkx" or "neo4j"
+  min_entity_frequency: 1  # prune very rare nodes
+  max_nodes_for_viz: 400
+  edge_weight_field: "count"
+  neo4j:
+    uri: "bolt://localhost:7687"
+    user: "neo4j"
+    password: "password"
+    database: "neo4j"
+    clear_before_load: true
+
+output:
+  graphml_path: "data/output/knowledge_graph.graphml"
+  gexf_path: "data/output/knowledge_graph.gexf"
+  triples_csv_path: "data/output/triples.csv"
+  html_viz_path: "data/output/knowledge_graph.html"
+  stats_json_path: "data/output/graph_stats.json"
+
+logging:
+  level: "INFO"
+  log_file: "data/output/pipeline.log"
